@@ -21,7 +21,7 @@ O teste:
    * Demandas válida: categoria "Manutenção de vias" + região "Região Metropolitana do Recife";
    * Demanda inválida: mesma categoria + região "Outra".
 3. Faz login real pela UI (/login) e confirma o redirecionamento para /telaUsuario.
-4. Seleciona simultaneamente os dois filtros nos <select> da tela inicial (Categoria e Região).
+4. Seleciona simultaneamente os dois filtros nos `<select>` da tela inicial (Categoria e Região).
 5. Aguarda a atualização da lista tratada via API (waitForResponse).
 6. Valida o resultado na interface:
    * Confirma que o card da demanda correspondente aos dois critérios está visível (toBeVisible).
