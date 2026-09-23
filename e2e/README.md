@@ -4,6 +4,113 @@ Suíte de testes End-to-End do RESOLVE. Cada arquivo em `tests/` automatiza um
 dos cenários de uso combinados em grupo, executado a partir da perspectiva
 real do usuário (navegador controlado pelo Playwright).
 
+## Entrega individual — aquilespereira (C1)
+
+**Arquivo:** [`tests/01-cadastros-sucesso.spec.ts`](tests/01-cadastros-sucesso.spec.ts)
+
+**Cenário 1 — Cidadão solicita uma nova demanda urbana**
+
+> Como Cidadão, preencho o formulário de solicitação urbana informando os
+> dados obrigatórios (descrição detalhada, categoria válida, região
+> correspondente e nível de prioridade adequado) e confirmo o envio da nova
+> demanda para o sistema.
+
+O teste:
+1. Cria um cidadão de teste via API.
+2. Faz login pela interface.
+3. Acessa o formulário de nova demanda.
+4. Preenche os campos obrigatórios (categoria, problema, região, endereço e
+   descrição) e confirma que cada `<select>`/campo ficou com o valor certo.
+5. Envia a nova demanda ("Salvar Denúncia").
+6. Confirma o redirecionamento de volta pra listagem (`/telaUsuario`).
+7. Confirma que o card da demanda recém-criada aparece no topo da lista,
+   com a categoria e o problema cadastrados.
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/01-cadastros-sucesso.spec.ts
+```
+
+---
+
+## Entrega individual — Icaro (C2)
+
+**Arquivo:** [`tests/02-validacao-campos-obrigatorios-nova-demanda.spec.ts`](tests/02-validacao-campos-obrigatorios-nova-demanda.spec.ts)
+
+**Cenário 2 — Cidadão tenta submeter o formulário de demanda em branco**
+
+> Como Cidadão, tento submeter o formulário de demanda com os campos
+> obrigatórios em branco, verificando se o sistema exibe as mensagens de
+> validação e bloqueia o envio.
+
+O teste:
+1. Cria um cidadão de teste via API e faz login real pela interface.
+2. Acessa o formulário de nova demanda (`/demandas/nova`).
+3. Clica em "Salvar Denúncia" sem preencher nenhum campo — confirma que o
+   envio foi bloqueado (a página continua em `/demandas/nova`) e que o
+   primeiro campo obrigatório (Categoria) é sinalizado como inválido.
+4. Preenche só Categoria, Problema e Região (deixando Endereço e Descrição
+   em branco) e tenta enviar de novo — confirma que continua bloqueado e
+   que agora é o campo Endereço que aparece como inválido.
+
+> 💡 Nota de implementação: todos os campos do formulário usam o atributo
+> HTML `required`, então quem valida é o próprio navegador (Constraint
+> Validation API) — o evento `submit` nem chega a disparar o handler React
+> enquanto houver campo obrigatório vazio. Por isso o teste confere
+> `validity`/`validationMessage` dos campos em vez de procurar por um
+> alerta na tela.
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/02-validacao-campos-obrigatorios-nova-demanda.spec.ts
+```
+
+---
+
+## Entrega individual — Icaro (C3)
+
+**Arquivo:** [`tests/03-busca-global-por-palavra-chave.spec.ts`](tests/03-busca-global-por-palavra-chave.spec.ts)
+
+**Cenário 3 — Cidadão usa a busca global por palavra-chave**
+
+> Como Cidadão, utilizo o campo de busca global digitando uma palavra-chave
+> para verificar se a lista exibe apenas as solicitações que contêm o termo
+> pesquisado.
+
+O teste (assumindo a busca implementada):
+1. Cria um cidadão de teste via API.
+2. Cria, via API, duas demandas do cidadão com títulos únicos: uma contendo
+   a palavra-chave do teste, outra sem ela.
+3. Faz login real pela interface e vai pra listagem (`/telaUsuario`).
+4. Digita a palavra-chave no campo de busca global.
+5. Confirma que só o card da demanda que contém o termo pesquisado continua
+   visível, e que o card da demanda sem o termo desaparece.
+
+> ⚠️ **Feature ainda não implementada:** hoje a seção "Filtros de busca" da
+> tela inicial só tem dropdowns (Status/Categoria/Região/Prioridade) — não
+> existe campo de texto livre pra buscar por palavra-chave no
+> título/descrição. Este teste documenta o comportamento esperado (spec) e
+> está marcado com `test.fail()` — ou seja, hoje ele falha (elemento não
+> encontrado) e isso é esperado, o Playwright reporta como "expected fail".
+> Quando alguém implementar a busca, ajustar o seletor
+> (`placeholder="Buscar por palavra-chave..."`) se necessário e remover o
+> `test.fail()`.
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/03-busca-global-por-palavra-chave.spec.ts
+```
+
+---
 
 ## Entrega individual — Cecília Medeiros (C4)
 
@@ -33,6 +140,67 @@ docker compose up -d --build
 
 cd ../e2e
 npx playwright test tests/04-validacao-filtros.spec.ts
+```
+
+---
+
+## Entrega individual — Beatriz Paredes (C5)
+
+**Arquivo:** `tests/05-navegacao_e_paginacao_da_listagem_de_solicitacoes.spec.ts`
+
+**Cenário 5 — Cidadão navega pelas páginas da listagem de solicitações**
+
+> Como Cidadão, navego pela listagem de solicitações, garantindo que
+> consigo visualizar as demandas cadastradas e avançar entre as páginas
+> sem perder o acesso à tela.
+
+O teste:
+1. Cria um cidadão via API para preparar o cenário.
+2. Realiza login via API para obter o token de autenticação.
+3. Cria 15 demandas de teste vinculadas ao cidadão.
+4. Faz login real pela interface em `/login`.
+5. Confirma o redirecionamento para `/telaUsuario`.
+6. Verifica se os cards de demandas são exibidos na listagem.
+7. Localiza o botão de próxima página e realiza a navegação, quando disponível.
+8. Confirma que o usuário permanece na tela de listagem após a navegação.
+
+```bash
+cd e2e
+npx playwright test tests/05-navegacao_e_paginacao_da_listagem_de_solicitacoes.spec.ts
+```
+
+---
+
+## Entrega individual — Thays Barbosa (C6)
+
+**Arquivo:** [`tests/06-validar-demanda.spec.ts`](tests/06-validar-demanda.spec.ts)
+
+**Cenário 6 — Detalhes da demanda**
+
+> Como Cidadão, acesso a página de detalhes de uma solicitação específica e
+> verifico se o histórico de atualizações e as informações do registro são
+> exibidos corretamente.
+
+O componente `DemandDetails.tsx` hoje só renderiza o estado atual da
+demanda (foto, categoria, prioridade, status atual, solicitante, endereço,
+data do registro, descrição) — não existe seção de histórico/timeline, nem
+campo de histórico no tipo `Demand`. Por isso o arquivo tem dois testes:
+
+1. **Informações do registro** (deve passar) — a demanda é criada pelo
+   formulário (mesmo fluxo do Cenário 1), abre os detalhes a partir do card
+   e confere problema, categoria, endereço e descrição na tela.
+2. **Histórico de atualizações** — marcado com `test.fail()` dentro do
+   próprio corpo do teste, porque a funcionalidade ainda não foi
+   implementada. A demanda aqui é criada via API (arrange rápido, mesmo
+   padrão do Cenário 8), deixando o teste focado só na asserção que
+   importa: a seção de histórico que ainda não existe.
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/06-validar-demanda.spec.ts
 ```
 
 ---
@@ -104,69 +272,66 @@ O teste:
 > número/nome na hora de consolidar a suíte se já tiver conflito com o
 > arquivo de outra pessoa.
 
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/08-alterar-prioridade-demanda.spec.ts
+```
+
 ---
 
-## Entrega individual — Isabella Batista (C11)
+## Entrega individual — Thays Barbosa (C9)
 
-**Arquivo:** [`tests/11-logout.spec.ts`](tests/11-logout.spec.ts)
+**Arquivo:** [`tests/09-atualizar-status.spec.ts`](tests/09-atualizar-status.spec.ts)
 
-**Cenário 11 — Encerramento de sessão (Logout)**
+**Cenário 9 — Painel Administrativo do Gestor**
 
-> Como usuário autenticado, clico na opção de encerrar sessão (Logout),
-> verificando o redirecionamento para a tela inicial e a limpeza dos
-> dados de sessão no navegador.
+> Como Gestor Público, acesso o Painel Administrativo e valido a exibição e
+> o carregamento correto dos principais indicadores operacionais (como
+> volume de demandas abertas, em andamento e encerradas).
 
-O teste:
-1. Cria (via API, só pra preparar o cenário) um cidadão de teste.
-2. Faz **login real pela UI** (`/login`).
-3. Confirma que a sessão está ativa pelo nome do usuário no header.
-4. Clica em "Sair".
-5. Confirma o redirecionamento para `/login`.
-6. Tenta acessar `/telaUsuario` diretamente e confirma que é barrado de volta
-   para `/login` — o guard de autenticação funciona após o logout.
-7. Lê o `localStorage` e confirma que token, papel, e-mail e nome foram
-   efetivamente limpos pelo Zustand.
+Hoje o painel (`frontend/src/app/gestor/dashboard/page.tsx`) só mostra três
+blocos — total de demandas, por categoria e por região — vindos do
+`apiMetrics` (`useDemandStore.fetchMetrics` → `metricsService.getKpis`). O
+tipo que `getKpis` retorna não tem `byStatus` em lugar nenhum, então o
+indicador de abertas/em andamento/encerradas que o enunciado pede ainda não
+existe. Por isso o arquivo tem dois testes:
+
+1. **Indicadores que já existem** (total, categoria, região) — deve
+   passar: cria demandas conhecidas via API e confere que os números sobem
+   depois de recarregar o painel (comparando com "aumentou pelo menos N",
+   pra não ficar instável à toa já que `apiMetrics` é um contador global
+   compartilhado com os outros cenários rodando ao mesmo tempo).
+2. **Indicadores por status** — marcado com `test.fail()` dentro do
+   próprio corpo do teste, porque o `byStatus` ainda não foi implementado.
+
+> 🐛 **Achado rodando localmente:** o primeiro teste (indicadores de
+> total/categoria/região) é instável nessa suíte — descobrimos que ele cai,
+> às vezes, no mesmo bug do Cenário 10 (**BUG-04**, ver
+> `RELATORIO_BUGS.md`): o guard da rota `/gestor/dashboard` roda antes do
+> Zustand terminar de reidratar o token salvo, então o segundo
+> `page.goto('/gestor/dashboard')` do teste ocasionalmente chuta o gestor
+> de volta pro login. Não é um problema deste teste especificamente — é o
+> mesmo bug de corrida documentado no Cenário 10, só que este cenário
+> também dá `page.goto` no painel e por isso também fica exposto a ele.
 
 ```bash
 cd backend
 docker compose up -d --build
 
 cd ../e2e
-npx playwright test tests/11-logout.spec.ts
+npx playwright test tests/09-atualizar-status.spec.ts
 ```
 
 ---
 
-## Entrega individual — Beatriz Paredes (C5)
-
-**Arquivo:** `tests/05-navegacao_e_paginacao_da_listagem_de_solicitacoes.spec.ts`
-
-**Cenário 5 — Cidadão navega pelas páginas da listagem de solicitações**
-
-> Como Cidadão, navego pela listagem de solicitações, garantindo que
-> consigo visualizar as demandas cadastradas e avançar entre as páginas
-> sem perder o acesso à tela.
-
-O teste:
-1. Cria um cidadão via API para preparar o cenário.
-2. Realiza login via API para obter o token de autenticação.
-3. Cria 15 demandas de teste vinculadas ao cidadão.
-4. Faz login real pela interface em `/login`.
-5. Confirma o redirecionamento para `/telaUsuario`.
-6. Verifica se os cards de demandas são exibidos na listagem.
-7. Localiza o botão de próxima página e realiza a navegação, quando disponível.
-8. Confirma que o usuário permanece na tela de listagem após a navegação.
-
-```bash
-cd e2e
-npx playwright test tests/05-navegacao_e_paginacao_da_listagem_de_solicitacoes.spec.ts
-```
-
----
-
-## Cenário 10 — Acesso não autorizado ao Painel do Gestor
+## Entrega individual — ArthurEstevaum (C10)
 
 **Arquivo:** [`tests/10-acesso-nao-autorizado-painel-gestor.spec.ts`](tests/10-acesso-nao-autorizado-painel-gestor.spec.ts)
+
+**Cenário 10 — Acesso não autorizado ao Painel do Gestor**
 
 > Como Cidadão não autorizado, tento acessar diretamente a URL do Painel do
 > Gestor via navegação, garantindo que o sistema bloqueia o acesso e
@@ -201,6 +366,45 @@ checagem de back-end e o outro lado da regra de autorização:
 > ✅ Validado localmente: `4 passed` (3 testes + 1 expected fail), estável em
 > 3 execuções seguidas, com o backend subido via `docker compose` e o front-end
 > pelo `webServer` do Playwright.
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/10-acesso-nao-autorizado-painel-gestor.spec.ts
+```
+
+---
+
+## Entrega individual — Isabella Batista (C11)
+
+**Arquivo:** [`tests/11-logout.spec.ts`](tests/11-logout.spec.ts)
+
+**Cenário 11 — Encerramento de sessão (Logout)**
+
+> Como usuário autenticado, clico na opção de encerrar sessão (Logout),
+> verificando o redirecionamento para a tela inicial e a limpeza dos
+> dados de sessão no navegador.
+
+O teste:
+1. Cria (via API, só pra preparar o cenário) um cidadão de teste.
+2. Faz **login real pela UI** (`/login`).
+3. Confirma que a sessão está ativa pelo nome do usuário no header.
+4. Clica em "Sair".
+5. Confirma o redirecionamento para `/login`.
+6. Tenta acessar `/telaUsuario` diretamente e confirma que é barrado de volta
+   para `/login` — o guard de autenticação funciona após o logout.
+7. Lê o `localStorage` e confirma que token, papel, e-mail e nome foram
+   efetivamente limpos pelo Zustand.
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/11-logout.spec.ts
+```
 
 ---
 
@@ -286,9 +490,15 @@ npm test
 ```
 e2e/
 ├── tests/
-│   ├── 05-navegacao_e_paginacao_da_listagem_de_solicitacoes.spec.ts
+│   ├── 01-cadastros-sucesso.spec.ts
+│   ├── 02-validacao-campos-obrigatorios-nova-demanda.spec.ts
+│   ├── 03-busca-global-por-palavra-chave.spec.ts
+│   ├── 04-validacao-filtros.spec.ts
+│   ├── 05-navegação_e_paginacao_da_listagem_de_solicitacoes.spec.ts
+│   ├── 06-validar-demanda.spec.ts
 │   ├── 07-detalhes-demanda.spec.ts
 │   ├── 08-alterar-prioridade-demanda.spec.ts
+│   ├── 09-atualizar-status.spec.ts
 │   ├── 10-acesso-nao-autorizado-painel-gestor.spec.ts
 │   └── 11-logout.spec.ts
 ├── package.json
