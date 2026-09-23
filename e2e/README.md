@@ -32,7 +32,7 @@ cd backend
 docker compose up -d --build
 
 cd ../e2e
-npx playwright test tests/4-validacao-filtros.spec.ts
+npx playwright test tests/04-validacao-filtros.spec.ts
 ```
 
 ---
