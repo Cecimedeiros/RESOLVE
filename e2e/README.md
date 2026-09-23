@@ -4,6 +4,39 @@ Suíte de testes End-to-End do RESOLVE. Cada arquivo em `tests/` automatiza um
 dos cenários de uso combinados em grupo, executado a partir da perspectiva
 real do usuário (navegador controlado pelo Playwright).
 
+
+## Entrega individual — Cecília Medeiros (C4)
+
+**Arquivo:** [`tests/4-validacao-filtros.spec.ts`](tests/04-validacao-filtros.spec.ts)
+
+**Cenário 4 — Cidadão filtra demandas por Categoria e Região**
+
+> Como Cidadão, quero aplicar simultaneamente os filtros de Categoria e Região
+> na tela inicial, para visualizar apenas as demandas que correspondam aos
+> critérios selecionados.
+
+O teste:
+1. Cria (via API, para preparar o cenário) um cidadão de teste e obtém o token de autenticação.
+2. Cria (via API) duas demandas de teste: 
+   * Demandas válida: categoria "Manutenção de vias" + região "Região Metropolitana do Recife";
+   * Demanda inválida: mesma categoria + região "Outra".
+3. Faz login real pela UI (/login) e confirma o redirecionamento para /telaUsuario.
+4. Seleciona simultaneamente os dois filtros nos <select> da tela inicial (Categoria e Região).
+5. Aguarda a atualização da lista tratada via API (waitForResponse).
+6. Valida o resultado na interface:
+   * Confirma que o card da demanda correspondente aos dois critérios está visível (toBeVisible).
+   * Confirma que o card da demanda de região diferente não é exibido na tela (toHaveCount(0)).
+
+```bash
+cd backend
+docker compose up -d --build
+
+cd ../e2e
+npx playwright test tests/4-validacao-filtros.spec.ts
+```
+
+---
+
 ## Entrega individual — Leandro (C7)
 
 **Arquivo:** [`tests/07-detalhes-demanda.spec.ts`](tests/07-detalhes-demanda.spec.ts)
