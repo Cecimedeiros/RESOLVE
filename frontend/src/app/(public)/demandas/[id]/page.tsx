@@ -20,6 +20,7 @@ export default function DemandDetailsCitizenPage() {
   const logout = useDemandStore((state) => state.logout);
   const fetchDemandById = useDemandStore((state) => state.fetchDemandById);
   const isLoading = useDemandStore((state) => state.isLoading);
+  const _hasHydrated = useDemandStore((state) => state._hasHydrated);
 
   useEffect(() => {
     setIsMounted(true);
@@ -35,7 +36,7 @@ export default function DemandDetailsCitizenPage() {
     router.push('/telaUsuario');
   };
 
-  if (!isMounted) return <div className="min-h-screen bg-neutral-100" />;
+  if (!isMounted || !_hasHydrated) return <div className="min-h-screen bg-neutral-100" />;
 
   if (isLoading && !demand) {
     return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FormDemanda } from "../../../../components/demands/FormDemanda";
 import Link from "next/link";
@@ -8,15 +8,29 @@ import { useDemandStore } from "@/stores/useDemandStore";
 
 export default function NovaDemandaPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const token = useDemandStore((state) => state.token);
   const userName = useDemandStore((state) => state.userName);
   const logout = useDemandStore((state) => state.logout);
+  const hasHydrated = useDemandStore((state) => state._hasHydrated);
 
   useEffect(() => {
-    if (!token) {
+    setMounted(true);
+    if (hasHydrated && !token) {
       router.push("/login");
     }
-  }, [token, router]);
+  }, [hasHydrated, token, router]);
+
+  if (!mounted || !hasHydrated) {
+    return (
+      <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <p className="text-gray-500 animate-pulse">Sincronizando dados...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-100">

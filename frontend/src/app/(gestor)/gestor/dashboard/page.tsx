@@ -97,21 +97,32 @@ export default function Page() {
     <div className="min-h-screen bg-gray-50">
       <nav className="flex justify-between items-center py-4 px-8 bg-white shadow-sm border-b border-gray-200">
         <h1 className="text-2xl font-bold text-purple-600">RESOLVE</h1>
-        <div className="flex items-center gap-4">
-          <Link href="/gestor/dashboard" className="text-purple-600 font-bold mr-4 hover:text-purple-700">
-            Painel de Gestão
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              logout();
-              router.push('/logingestor');
-            }}
-            className="text-purple-400 font-normal hover:text-purple-500"
-          >
-            Sair
-          </button>
-        </div>
+        
+<div className="flex items-center gap-4">
+  <Link href="/gestor/dashboard" className="text-purple-600 font-bold mr-4 hover:text-purple-700">
+    Painel de Gestão
+  </Link>
+
+  <a
+    href="https://metereoregion-pe.streamlit.app/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-purple-600 font-semibold hover:text-purple-800"
+  >
+    Clima e Risco Meteorológico
+  </a>
+  <button
+    type="button"
+    onClick={() => {
+      logout();
+      router.push('/logingestor');
+    }}
+    className="text-purple-400 font-normal hover:text-purple-500"
+  >
+    Sair
+  </button>
+</div>
+
       </nav>
 
       <div className="w-full h-64 bg-linear-to-r from-indigo-900 via-fuchsia-500 to-orange-500 flex items-start justify-center pt-10">
